@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Links{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">EF101 · PROJECT 06</p>
+    <h1>Make long links <span>short.</span></h1>
+    <p class="muted">Create shareable short URLs and understand how often they are opened.</p>
+  </div>
+  <div class="hero-icon">↗</div>
+</section>
+<section class="stats">
+  <div class="stat-card"><span>Total links</span><strong>{{ total_links }}</strong></div>
+  <div class="stat-card"><span>Active links</span><strong>{{ active_links }}</strong></div>
+  <div class="stat-card"><span>Total clicks</span><strong>{{ total_clicks }}</strong></div>
+  <div class="stat-card"><span>Zero-click links</span><strong>{{ zero_clicks }}</strong></div>
+</section>
+<section class="panel create-panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">CREATE A LINK</p>
+      <h2>Shorten a URL</h2>
+    </div>
+  </div>
+  <form method="post" class="create-form">
+    <label for="original_url">Original URL</label>
+    <div class="input-row"><input id="original_url" name="original_url" type="url"
+        placeholder="https://example.com/a/very/long/page" required>
+      <button class="button primary" type="submit">Create short link <span>→</span></button>
+    </div>
+    <p class="hint">Only http:// and https:// addresses are accepted.</p>
+  </form>
+</section>
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">YOUR LIBRARY</p>
+      <h2>Saved links</h2>
+    </div><a class="text-link" href="{{ url_for('analytics') }}">View analytics →</a>
+  </div>
+  <form method="get" class="filters">
+    <input name="q" value="{{ search }}" placeholder="Search URL or short code">
+    <select name="status">
+      <option value="all" {{ 'selected' if status=='all' }}>All statuses</option>
+      <option value="active" {{ 'selected' if status=='active' }}>Active</option>
+      <option value="inactive" {{ 'selected' if status=='inactive' }}>Inactive</option>
+    </select>
+    <button class="button secondary" type="submit">Filter</button><a class="clear-link"
+      href="{{ url_for('index') }}">Clear</a>
+  </form>
+  {% if links %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Short link</th>
+          <th>Destination</th>
+          <th>Created</th>
+          <th>Clicks</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for link in links %}
+        <tr>
+          <td><a class="short-code" href="{{ request.host_url.rstrip('/') }}/{{ link.short_code }}" target="_blank"
+              rel="noopener">{{ request.host_url.rstrip('/') }}/{{ link.short_code }}</a><small>{{ link.short_code
+              }}</small></td>
+          <td class="destination"><a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url
+              }}</a>{% if link.is_demo %}<span class="demo-tag">DEMO DATA</span>{% endif %}</td>
+          <td class="nowrap">{{ link.created_at|prettydate }}</td>
+          <td><strong>{{ link.clicks }}</strong></td>
+          <td><span class="status {{ 'active' if link.is_active else 'inactive' }}">{{ 'Active' if link.is_active else
+              'Inactive' }}</span></td>
+          <td>
+            <div class="actions">
+              <form method="post" action="{{ url_for('toggle_link', link_id=link.id) }}"><button class="mini-button"
+                  type="submit">{{ 'Deactivate' if link.is_active else 'Activate' }}</button></form>
+              <form method="post" action="{{ url_for('delete_link', link_id=link.id) }}"
+                onsubmit="return confirm('Delete this link and its click history?')"><button class="mini-button danger"
+                  type="submit">Delete</button></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<div class="empty">
+    <div>↗</div>
+    <h3>No links found</h3>
+    <p>Create your first short link or change the filters.</p>
+  </div>{% endif %}
+</section>
+{% endblock %}

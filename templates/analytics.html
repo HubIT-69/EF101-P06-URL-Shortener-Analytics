@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">PERFORMANCE OVERVIEW</p>
+    <h1>Link <span>analytics.</span></h1>
+    <p class="muted">A snapshot of link activity and recorded visits.</p>
+  </div>
+  <div class="hero-icon">▥</div>
+</section>
+<section class="stats two">
+  <div class="stat-card"><span>Links created</span><strong>{{ total_links }}</strong></div>
+  <div class="stat-card"><span>Recorded visits</span><strong>{{ total_clicks }}</strong></div>
+</section>
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">LAST 7 DAYS</p>
+      <h2>Clicks per day</h2>
+    </div>
+  </div>
+  <div class="chart" role="img" aria-label="Bar chart showing clicks for the last seven days">
+    {% for item in chart_data %}
+    <div class="bar-column"><span class="bar-value">{{ item.clicks }}</span>
+      <div class="bar-track">
+        <div class="bar" style="height: {{ (item.clicks / max_clicks * 100) if item.clicks else 2 }}%"></div>
+      </div><span class="bar-label">{{ item.day }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="hint">Dates are shown as month-day. Each successful short-link redirect adds one click event.</p>
+</section>
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">MOST VISITED</p>
+      <h2>Top links</h2>
+    </div><a class="text-link" href="{{ url_for('export_csv') }}">Download CSV →</a>
+  </div>
+  {% if top_links %}<div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Short code</th>
+          <th>Destination</th>
+          <th>Clicks</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for link in top_links %}<tr>
+          <td><span class="short-code">{{ link.short_code }}</span></td>
+          <td class="destination">{{ link.original_url }}</td>
+          <td><strong>{{ link.clicks }}</strong></td>
+          <td><span class="status {{ 'active' if link.is_active else 'inactive' }}">{{ 'Active' if link.is_active else
+              'Inactive' }}</span></td>
+        </tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>{% else %}<p class="muted">No links yet. Create one to begin.</p>{% endif %}
+</section>
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">NEEDS ATTENTION</p>
+      <h2>Links with zero clicks</h2>
+    </div>
+  </div>
+  {% if zero_clicks %}<ul class="zero-list">{% for link in zero_clicks %}<li><span class="short-code">{{ link.short_code
+        }}</span><span>{{ link.original_url }}</span></li>{% endfor %}</ul>{% else %}<p class="muted">Every saved link
+    has at least one click.</p>{% endif %}
+</section>
+{% endblock %}

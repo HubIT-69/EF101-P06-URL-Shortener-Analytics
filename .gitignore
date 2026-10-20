@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+url_shortener.db
+.env
+.DS_Store
